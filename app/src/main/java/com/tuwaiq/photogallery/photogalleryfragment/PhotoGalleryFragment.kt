@@ -3,12 +3,12 @@ package com.tuwaiq.photogallery.photogalleryfragment
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.SearchView
+
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,11 +24,17 @@ class PhotoGalleryFragment : Fragment() {
 
     private val viewModel by lazy { ViewModelProvider(this)[PhotoGalleryViewModel::class.java] }
 
+
+
     private lateinit var photoRv:RecyclerView
     private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
+
+
 
         viewModel.responseLiveData.observe(
             this , Observer { response ->
@@ -41,7 +47,7 @@ class PhotoGalleryFragment : Fragment() {
 
     }
 
-    fun updateUI (photos : List<GalleryItem>){
+    private fun updateUI (photos : List<GalleryItem>){
         photoRv.adapter = PhotoAdapter(photos)
     }
 
@@ -59,7 +65,49 @@ class PhotoGalleryFragment : Fragment() {
         return view
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.photo_gallery_fragment,menu)
 
+        val searchItem = menu.findItem(R.id.search_view)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.apply {
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+                override fun onQueryTextSubmit(query: String?): Boolean {
+
+                    if (query != null){
+                        viewModel.sendQueryFetchPhotos(query)
+                        progressBar.visibility = View.VISIBLE
+                    }
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    // nothing to do here
+                    return false
+                }
+
+            })
+
+            setOnSearchClickListener {
+                searchView.setQuery(viewModel.searchTerm,false)
+            }
+        }
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.clear_search -> {
+                viewModel.sendQueryFetchPhotos("")
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+
+    }
 
     private inner class PhotoViewHolder (view: View): RecyclerView.ViewHolder(view){
 

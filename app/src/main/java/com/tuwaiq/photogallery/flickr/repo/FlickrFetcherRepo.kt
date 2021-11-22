@@ -4,9 +4,11 @@ package com.tuwaiq.photogallery.flickr.repo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.tuwaiq.photogallery.flickr.api.FlickrApi
+import com.tuwaiq.photogallery.flickr.api.PhotoInterceptor
 import com.tuwaiq.photogallery.flickr.modules.FlickrResponse
 import com.tuwaiq.photogallery.flickr.modules.GalleryItem
 import com.tuwaiq.photogallery.flickr.modules.PhotoResponse
+import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,18 +20,27 @@ private const val TAG = "FlickrFetcherRepo"
 
 class FlickrFetcherRepo {
 
+    private val client:OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(PhotoInterceptor())
+        .build()
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://www.flickr.com/")
         .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
         .build()
 
     private val flickrApi = retrofit.create(FlickrApi::class.java)
 
-    fun fetchPhoto():LiveData<List<GalleryItem>>{
+    fun fetchPhotos():LiveData<List<GalleryItem>> = fetchPhotosMetaData(flickrApi.fetchPhotos())
+
+    fun searchPhotos(query:String):LiveData<List<GalleryItem>> = fetchPhotosMetaData(flickrApi.searchPhotos(query))
+
+    private fun fetchPhotosMetaData(photoRequest: Call<FlickrResponse>):LiveData<List<GalleryItem>>{
 
         val responseLiveData:MutableLiveData<List<GalleryItem>> = MutableLiveData()
 
-        val photoRequest: Call<FlickrResponse> = flickrApi.fetchPhotos()
+
 
         photoRequest.enqueue(object : Callback<FlickrResponse>{
             override fun onResponse(

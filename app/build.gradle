@@ -56,4 +56,7 @@ dependencies {
 
     // this is to load image from url in image view
     implementation("io.coil-kt:coil:1.4.0")
+
+    // shared preferences library
+    implementation 'androidx.preference:preference-ktx:1.1.1'
 }
