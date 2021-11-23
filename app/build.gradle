@@ -59,4 +59,7 @@ dependencies {
 
     // shared preferences library
     implementation 'androidx.preference:preference-ktx:1.1.1'
+
+    // workManager library
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 }

@@ -2,6 +2,7 @@ package com.tuwaiq.photogallery.photogalleryfragment
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -12,9 +13,14 @@ import android.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import coil.load
 import com.tuwaiq.photogallery.R
 import com.tuwaiq.photogallery.flickr.modules.GalleryItem
+import com.tuwaiq.photogallery.workers.TestWorker
 
 
 const val TAG = "PhotoGalleryFragment"
@@ -44,7 +50,17 @@ class PhotoGalleryFragment : Fragment() {
             }
         )
 
+        val constraint = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .build()
 
+        val workRequest = OneTimeWorkRequest
+            .Builder(TestWorker::class.java)
+            .setConstraints(constraint)
+            .build()
+
+        WorkManager.getInstance(requireContext())
+            .enqueue(workRequest)
     }
 
     private fun updateUI (photos : List<GalleryItem>){
