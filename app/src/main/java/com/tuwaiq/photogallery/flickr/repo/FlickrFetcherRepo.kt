@@ -34,6 +34,10 @@ class FlickrFetcherRepo {
 
     fun fetchPhotos():LiveData<List<GalleryItem>> = fetchPhotosMetaData(flickrApi.fetchPhotos())
 
+    fun fetchPhotosRequest():Call<FlickrResponse> = flickrApi.fetchPhotos()
+
+    fun searchPhotosRequest(query: String): Call<FlickrResponse> = flickrApi.searchPhotos(query)
+
     fun searchPhotos(query:String):LiveData<List<GalleryItem>> = fetchPhotosMetaData(flickrApi.searchPhotos(query))
 
     private fun fetchPhotosMetaData(photoRequest: Call<FlickrResponse>):LiveData<List<GalleryItem>>{
