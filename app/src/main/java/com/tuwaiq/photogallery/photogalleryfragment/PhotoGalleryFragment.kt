@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
 import coil.load
+import com.tuwaiq.photogallery.PhotoPageActivity
 import com.tuwaiq.photogallery.QueryPreferences
 import com.tuwaiq.photogallery.R
 import com.tuwaiq.photogallery.flickr.modules.GalleryItem
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit
 
 const val TAG = "PhotoGalleryFragment"
 const val POLL_WORKER = "PollWorker"
+const val PHOTO_LINK_KEY = "photoLink"
 
 class PhotoGalleryFragment : Fragment() {
 
@@ -212,12 +214,18 @@ class PhotoGalleryFragment : Fragment() {
 
     }
 
-    private inner class PhotoViewHolder (view: View): RecyclerView.ViewHolder(view){
+    private inner class PhotoViewHolder (view: View): RecyclerView.ViewHolder(view) , View.OnClickListener{
 
         private val photoIv: ImageView = view.findViewById(R.id.photo_item)
+        private lateinit var photo: GalleryItem
 
+        init {
+            photoIv.setOnClickListener(this)
+        }
 
         fun bind(photo: GalleryItem){
+
+            this.photo = photo
 
             photoIv.load(photo.url){
                 placeholder(R.drawable.ic_baseline_cloud_download_24)
@@ -225,6 +233,16 @@ class PhotoGalleryFragment : Fragment() {
             }
 
 
+        }
+
+        override fun onClick(v: View?) {
+
+            val fullPhotoLink = "https://www.flickr.com/photos/${photo.userName}/${photo.id}"
+
+            val intent = Intent(requireContext(),PhotoPageActivity::class.java).apply {
+                putExtra(PHOTO_LINK_KEY,fullPhotoLink)
+            }
+            startActivity(intent)
         }
 
     }
